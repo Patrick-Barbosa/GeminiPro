@@ -32,8 +32,6 @@ if prompt := st.chat_input("Como posso te ajudar?"):
     
     # Configuração personalizada de geração
     generation_config = genai.types.GenerationConfig(
-        candidate_count=1,  # Número de candidatos a gerar
-        stop_sequences=['.'],  # Sequências de parada para terminar a geração
         temperature=0.3  # Controla a aleatoriedade da geração
     )
     
