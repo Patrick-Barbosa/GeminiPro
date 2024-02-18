@@ -1,26 +1,24 @@
 import streamlit as st
+import os
 import google.generativeai as genai
 
-
-ApiKey = st.secrets["GOOGLE_GEMINI_KEY"]
-
-# Initialize Gemini-Pro
-genai.configure(api_key=ApiKey)
+# Initialize Gemini-Pro 
+genai.configure(api_key=os.getenv("GOOGLE_GEMINI_KEY"))
 model = genai.GenerativeModel('gemini-pro')
 
 # Gemini uses 'model' for assistant; Streamlit uses 'assistant'
 def role_to_streamlit(role):
-  if role == "model":
-    return "assistant"
-  else:
-    return role
+    if role == "model":
+        return "assistant"
+    else:
+        return role
 
-# Correção: Garantir a inicialização do 'chat' antes de acessá-lo
+# Add a Gemini Chat history object to Streamlit session state
 if "chat" not in st.session_state:
-    st.session_state["chat"] = model.start_chat(history=[])
+    st.session_state.chat = model.start_chat(history=[])
 
 # Display Form Title
-st.title("Teste o Gemini Pro!")
+st.title("Chat with Google Gemini-Pro!")
 
 # Display chat messages from history above current input box
 for message in st.session_state.chat.history:
@@ -28,14 +26,18 @@ for message in st.session_state.chat.history:
         st.markdown(message.parts[0].text)
 
 # Accept user's next message, add to context, resubmit context to Gemini
-prompt = st.text_input("Como posso te ajudar?")
-if prompt:
+if prompt := st.chat_input("I possess a well of knowledge. What would you like to know?"):
     # Display user's last message
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    st.chat_message("user").markdown(prompt)
     
-    # Send user entry to Gemini and read the response
-    response = st.session_state.chat.send_message(prompt)
+    # Altere aqui os parâmetros conforme necessário
+    custom_params = {
+        "temperature": 0.3,  # Exemplo: reduzir a aleatoriedade da resposta
+        # Adicione outros parâmetros conforme necessário
+    }
+    
+    # Send user entry to Gemini and read the response, including custom parameters
+    response = st.session_state.chat.send_message(prompt, **custom_params)
     
     # Display last response
     with st.chat_message("assistant"):
