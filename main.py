@@ -2,43 +2,44 @@ import streamlit as st
 import os
 import google.generativeai as genai
 
-# Initialize Gemini-Pro 
+# Configure a API key
 genai.configure(api_key=os.getenv("GOOGLE_GEMINI_KEY"))
 model = genai.GenerativeModel('gemini-pro')
 
-# Gemini uses 'model' for assistant; Streamlit uses 'assistant'
+# Função para adaptar o papel do modelo para o Streamlit
 def role_to_streamlit(role):
     if role == "model":
         return "assistant"
     else:
         return role
 
-# Add a Gemini Chat history object to Streamlit session state
+# Inicializa o histórico de chat no estado da sessão, se ainda não existir
 if "chat" not in st.session_state:
     st.session_state.chat = model.start_chat(history=[])
 
-# Display Form Title
-st.title("Chat with Google Gemini-Pro!")
+# Exibe o título do formulário
+st.title("Testando o Gemini Pro!")
 
-# Display chat messages from history above current input box
+# Exibe mensagens de chat anteriores
 for message in st.session_state.chat.history:
     with st.chat_message(role_to_streamlit(message.role)):
         st.markdown(message.parts[0].text)
 
-# Accept user's next message, add to context, resubmit context to Gemini
-if prompt := st.chat_input("I possess a well of knowledge. What would you like to know?"):
-    # Display user's last message
+# Aceita a próxima mensagem do usuário e adiciona ao contexto
+if prompt := st.chat_input("Como posso te ajudar?"):
+    # Exibe a última mensagem do usuário
     st.chat_message("user").markdown(prompt)
     
-    # Altere aqui os parâmetros conforme necessário
-    custom_params = {
-        "temperature": 0.3,  # Exemplo: reduzir a aleatoriedade da resposta
-        # Adicione outros parâmetros conforme necessário
-    }
+    # Configuração personalizada de geração
+    generation_config = genai.types.GenerationConfig(
+        candidate_count=1,  # Número de candidatos a gerar
+        stop_sequences=['.'],  # Sequências de parada para terminar a geração
+        temperature=0.3  # Controla a aleatoriedade da geração
+    )
     
-    # Send user entry to Gemini and read the response, including custom parameters
-    response = st.session_state.chat.send_message(prompt, **custom_params)
+    # Envia a entrada do usuário para o Gemini e lê a resposta, incluindo a configuração de geração
+    response = st.session_state.chat.send_message(prompt, generation_config=generation_config)
     
-    # Display last response
+    # Exibe a última resposta
     with st.chat_message("assistant"):
         st.markdown(response.text)
