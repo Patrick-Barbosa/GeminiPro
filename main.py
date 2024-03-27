@@ -4,7 +4,7 @@ import google.generativeai as genai
 
 # Configure a API key
 genai.configure(api_key=os.getenv("GOOGLE_GEMINI_KEY"))
-model = genai.GenerativeModel('gemini-1.5-pro-latest')
+model = genai.GenerativeModel('gemini-1.0-pro-latest')
 
 # Função para adaptar o papel do modelo para o Streamlit
 def role_to_streamlit(role):
